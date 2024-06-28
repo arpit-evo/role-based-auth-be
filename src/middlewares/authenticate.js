@@ -12,11 +12,15 @@ const authenticate = async (req, res, next) => {
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
 
     const user = await User.findById(decodedToken.id).select("-password");
+    
+    if (!user) {
+      throw new Error("user not found");
+    }
 
     req.user = user;
     next();
   } catch (error) {
-    throw new Error( "Invalid token" );
+    throw new Error("Invalid token");
   }
 };
 

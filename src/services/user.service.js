@@ -51,7 +51,7 @@ const update = async (req) => {
 
 const getAll = async () => {
   try {
-    const users = await User.find();
+    const users = await User.find().select("-password");
     return users;
   } catch (error) {
     throw new Error("get all user fail");

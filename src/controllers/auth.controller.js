@@ -15,9 +15,8 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const accessToken = await userLogin(req);
-    res.cookie("token", accessToken, { httpOnly: true, maxAge: 86400000 });
-    res.status(200).json({ message: "user login", success: true, data: null });
+    const token = await userLogin(req);
+    res.status(200).json({ message: "user login", success: true, data: token });
   } catch (error) {
     res
       .status(500)

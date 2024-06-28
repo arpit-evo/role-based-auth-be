@@ -6,7 +6,7 @@ const authenticate = async (req, res, next) => {
   const token = authHeader && authHeader.split(" ")[1];
   try {
     if (!token) {
-      throw new Error({ message: "Token is not provided", status: 400 });
+      throw new Error("Token is not provided");
     }
 
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
@@ -16,7 +16,7 @@ const authenticate = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    throw new Error({ error, message: "Invalid token" });
+    throw new Error( "Invalid token" );
   }
 };
 

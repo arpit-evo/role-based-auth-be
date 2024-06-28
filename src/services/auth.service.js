@@ -12,7 +12,7 @@ const createUser = async (req) => {
 
     return newUser;
   } catch (error) {
-    throw new Error(error, "registration failed");
+    throw new Error("registration failed");
   }
 };
 
@@ -27,20 +27,20 @@ const userLogin = async (req) => {
     const user = await User.findOne({ email: email });
 
     if (!user) {
-      throw new Error({ message: "user not found with this email" });
+      throw new Error("user not found with this email");
     }
 
     const isMatch = await bcryptjs.compare(password, user.password);
 
     if (!isMatch) {
-      throw new Error({ message: "invalid credential" });
+      throw new Error("invalid credential");
     }
 
     const accessToken = generateToken(user);
 
     return accessToken;
   } catch (error) {
-    throw new Error({ error, message: "registration failed" });
+    throw new Error("registration failed");
   }
 };
 

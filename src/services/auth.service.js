@@ -1,18 +1,22 @@
 const bcryptjs = require("bcryptjs");
 const User = require("../models/User");
 const generateToken = require("../utils/generateToken");
+const { ROLES } = require("../utils/enums");
 
 const createUser = async (req) => {
-  const { email, password, role } = req.body;
-
+  const { email, password, name } = req.body;
   try {
     const hashPassword = await bcryptjs.hash(password, 10);
-    const newUser = new User({ email, password: hashPassword, role });
-    await newUser.save();
+    const newUser = await User.create({
+      email,
+      password: hashPassword,
+      role: ROLES.USER,
+      name,
+    });
 
     return newUser;
   } catch (error) {
-    throw new Error("registration failed");
+    throw new Error("Registration failed");
   }
 };
 
@@ -20,28 +24,23 @@ const userLogin = async (req) => {
   const { email, password } = req.body;
 
   if (!email && !password) {
-    throw new Error("email and password required");
+    throw new Error("Email and password required");
+  }
+  const user = await User.findOne({ email: email });
+
+  if (!user) {
+    throw new Error("Email is not registered yet");
   }
 
-  try {
-    const user = await User.findOne({ email: email });
+  const isMatch = await bcryptjs.compare(password, user.password);
 
-    if (!user) {
-      throw new Error("user not found with this email");
-    }
-
-    const isMatch = await bcryptjs.compare(password, user.password);
-
-    if (!isMatch) {
-      throw new Error("invalid credential");
-    }
-
-    const accessToken = generateToken(user);
-
-    return accessToken;
-  } catch (error) {
-    throw new Error("registration failed");
+  if (!isMatch) {
+    throw new Error("Invalid credentials");
   }
+
+  const accessToken = generateToken(user);
+
+  return accessToken;
 };
 
 module.exports = {

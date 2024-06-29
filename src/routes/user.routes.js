@@ -1,22 +1,21 @@
 const express = require("express");
 const {
-  me,
+  getProfile,
   getAllUser,
   updateUser,
   deleteUser,
+  updateUserRole,
 } = require("../controllers/user.controller");
 const { authorizeRoles } = require("../middlewares/authenticate");
+const { ROLES } = require("../utils/enums");
 
 const router = express.Router();
 
-router.get("/me", me);
-router.get("/all-users", authorizeRoles(["admin", "moderator"]), getAllUser);
-router.patch("/update/:id", authorizeRoles(["admin", "moderator"]), updateUser);
-router.patch("/update",updateUser)
-router.delete(
-  "/delete/:id",
-  authorizeRoles(["admin", "moderator"]),
-  deleteUser
-);
+router.get("/profile", getProfile);
+router.put("/profile", updateUser);
+
+router.get("/", authorizeRoles([ROLES.ADMIN, ROLES.MODERATOR]), getAllUser);
+router.put("/:userId", authorizeRoles([ROLES.ADMIN]), updateUserRole);
+router.delete("/:userId", authorizeRoles([ROLES.ADMIN]), deleteUser);
 
 module.exports = router;

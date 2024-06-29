@@ -1,48 +1,38 @@
-const bcryptjs = require("bcryptjs");
 const User = require("../models/User");
 
 const getUser = async (req) => {
+  delete req.user.createdAt;
+  delete req.user.updatedAt;
+  delete req.user.password;
+  delete req.user.isDeleted;
+
   return req.user;
 };
 
 const _delete = async (req) => {
-  const { id } = req.params;
+  const { userId } = req.params;
 
   try {
-    return await User.findByIdAndDelete(id);
+    return await User.findByIdAndUpdate(userId, { isDeleted: true });
   } catch (error) {
     throw new Error("user delete fail");
   }
 };
 
 const update = async (req) => {
-  let { id } = req.params;
-
-  if (!id) {
-    id = req.user._id;
-  }
-  const { role, password, email, reported } = req.body;
+  const userId = req.user._id;
+  const { name } = req.body;
 
   try {
-    let user = await User.findById(id);
+    let user = await User.countDocuments({ _id: userId });
 
     if (!user) {
       throw new Error("user not found");
     }
-    let hashPassword;
-    if (password) {
-      hashPassword = await bcryptjs.hash(password, 10);
-    }
 
-    const updatedUser = {
-      email: email || user.email,
-      password: hashPassword || user.password,
-      role: role || user.role,
-      reported: reported || user.reported,
-    };
+    user = await User.findByIdAndUpdate(userId, { name }).select("name email");
 
-    user = await User.findByIdAndUpdate(id, updatedUser, { new: true });
-
+    user.name = name;
     return user;
   } catch (error) {
     throw new Error("user update fail");
@@ -51,10 +41,30 @@ const update = async (req) => {
 
 const getAll = async () => {
   try {
-    const users = await User.find().select("-password");
+    const users = await User.find().select("-password -createdAt -updatedAt");
     return users;
   } catch (error) {
     throw new Error("get all user fail");
+  }
+};
+
+const changeUserRole = async (req) => {
+  const { userId } = req.params;
+  const { role } = req.body;
+
+  try {
+    let user = await User.countDocuments({ _id: userId });
+
+    if (!user) {
+      throw new Error("user not found");
+    }
+
+    user = await User.findByIdAndUpdate(userId, { role: parseInt(role) }).select("name email");
+
+    user.role = role;
+    return user;
+  } catch (error) {
+    throw new Error("user role update fail");
   }
 };
 
@@ -63,4 +73,5 @@ module.exports = {
   _delete,
   update,
   getAll,
+  changeUserRole,
 };

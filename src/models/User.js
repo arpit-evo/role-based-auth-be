@@ -1,28 +1,34 @@
 const mongoose = require("mongoose");
+const { ROLES } = require("../utils/enums");
 
 const userSchema = new mongoose.Schema(
   {
     email: {
       type: String,
-      required: [true, "email is required"],
+      required: [true, "Email is required"],
       unique: true,
     },
     password: {
       type: String,
-      required: [true, "password is required"],
+      required: [true, "Password is required"],
     },
     role: {
       type: String,
-      enum: ["user", "admin", "moderator"],
+      enum: [ROLES.ADMIN, ROLES.MODERATOR, ROLES.USER],
       default: "user",
     },
-    reported: {
+    name: {
+      type: String,
+      required: [true, "Name is required"],
+    },
+    isDeleted: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   {
     timestamps: true,
+    versionKey: false,
   }
 );
 
